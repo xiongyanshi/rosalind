@@ -6,6 +6,8 @@ from Bio import SeqIO
 
 
 def parse_fasta_to_matrix(file_path):
+    '''return the sequence base matrix for a give alignment fasta file,
+    discard sequence name'''
     record = SeqIO.parse(file_path, 'fasta')
     seq_matrix = []
     for entry in record:
@@ -13,7 +15,8 @@ def parse_fasta_to_matrix(file_path):
     return seq_matrix
 
 
-def most_base(dna_seq):
+def consensus_base(dna_seq):
+    '''return the most consensus base in a given loci, dna_seq'''
     maxx = 0
     result = ''
     dna_seq = dna_seq.upper()
@@ -38,7 +41,7 @@ def seq_matrix_to_profile(seq_matrix):
         c_list.append(row_i.count('C'))
         g_list.append(row_i.count('G'))
         t_list.append(row_i.count('T'))
-        consensus_seq += most_base(row_i)
+        consensus_seq += consensus_base(row_i)
     return {'con': consensus_seq,
             'A': a_list,
             'C': c_list,
@@ -50,10 +53,9 @@ def main():
     sequence_matrix = parse_fasta_to_matrix(sys.argv[1])
     seq_profile = seq_matrix_to_profile(sequence_matrix)
     print seq_profile['con']
-    print 'A:', ''.join([str(i) + ' ' for i in seq_profile['A']])
-    print 'C:', ''.join([str(i) + ' ' for i in seq_profile['C']])
-    print 'G:', ''.join([str(i) + ' ' for i in seq_profile['G']])
-    print 'T:', ''.join([str(i) + ' ' for i in seq_profile['T']])
+    for base in 'ACGT':
+        base_profile = ''.join([str(i) + ' ' for i in seq_profile[base]])
+        print '{}: {}'.format(base, base_profile)
 
 
 if __name__ == '__main__':
