@@ -25,7 +25,13 @@ def motif_in_all(motif, all_seq_list):
 def substring(seq):
     '''return all subsrings of seq into a list,
     from longest(len(seq) - 1) to shoortest, 2'''
-    pass
+    result = []
+    for start in range(len(seq)):
+        for length in range(2, len(seq) - start + 1):
+            substr = seq[start:start + length]
+            if len(seq) > len(substr) > 1:
+                result.append(substr)
+    return sorted(result, key=len, reverse=True)
 
 
 def main():
@@ -33,7 +39,15 @@ def main():
     seq_list = []
     for i in fasta_dict.values():
         seq_list.append(i)
-    print seq_list
+
+    subseq = substring(sorted(seq_list, key=len)[0])
+    
+    longest_motif = ''
+    for motif in subseq:
+        if motif_in_all(motif, seq_list) and len(motif) > len(longest_motif):
+            longest_motif = motif
+            print motif
+            break
 
 
 if __name__ == '__main__':
