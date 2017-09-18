@@ -3,6 +3,7 @@
 
 import sys
 from Bio import SeqIO
+import time
 
 
 def fasta_to_dict(filepath):
@@ -41,7 +42,7 @@ def main():
         seq_list.append(i)
 
     subseq = substring(sorted(seq_list, key=len)[0])
-    
+
     longest_motif = ''
     for motif in subseq:
         if motif_in_all(motif, seq_list) and len(motif) > len(longest_motif):
@@ -51,4 +52,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    print("-- Finished in %.5s seconds --" % (time.time() - start_time))
