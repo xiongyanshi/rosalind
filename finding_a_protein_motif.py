@@ -6,9 +6,14 @@ from Bio import SeqIO, ExPASy
 import re
 
 
-def match_motif(protein_seq):
+def find_motif(protein_seq):
     '''return the location of motif N{P}[ST]{P} in protein_seq '''
-    pass
+    p = re.compile(r'N[^P][ST][^P]')
+    m = p.findall(protein_seq)
+    loci = []
+    for motif in m:
+        loci.append(protein_seq.index(motif) + 1)
+    return loci
 
 
 def get_pro_from_uniport(id):
@@ -22,7 +27,9 @@ def main():
     with open(sys.argv[1]) as file:
         ID_list = file.read().strip().split()
     for i in ID_list:
-        print '{} \t- \t{}'.format(i, get_pro_from_uniport(i))
+        print i,
+        # print '{} \t- \t{}'.format(i, get_pro_from_uniport(i))
+        print find_motif(get_pro_from_uniport(i))
 
 
 if __name__ == '__main__':
