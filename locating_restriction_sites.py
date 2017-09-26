@@ -29,7 +29,7 @@ def main():
     seq = str(fasta.seq)
 
     for start_pos in range(0, len(seq)-4):
-        for length in range(4, 13, 2):
+        for length in range(4, min(12, len(seq) - start_pos) + 1, 2):
             test_seq = seq[start_pos:start_pos+length]
             if reverse_palindrome(test_seq):
                 print start_pos + 1, len(test_seq), test_seq
