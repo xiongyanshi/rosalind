@@ -3,25 +3,13 @@
 
 import sys
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 
-def complement_dna(base):
-    if base == 'A' or base == 'a':
-        return 'T'
-    if base == 'T' or base == 't':
-        return 'A'
-    if base == 'G' or base == 'g':
-        return 'C'
-    if base == 'C' or base == 'c':
-        return 'G'
-
-
-def reverse_palindrome(sequence):
-    i = 0
-    for i in range(len(sequence)//2):
-        if sequence[i] != complement_dna(sequence[-1-i]):
-            return False
-    return True
+def reverse_palindrome_v2(sequence):
+    '''return true if 'sequence' is a reverse palindrome sequence'''
+    seq = Seq(sequence)
+    return str(seq) == str(seq.reverse_complement())
 
 
 def main():
@@ -29,9 +17,9 @@ def main():
     seq = str(fasta.seq)
 
     for start_pos in range(0, len(seq)-4):
-        for length in range(4, min(12, len(seq) - start_pos) + 1, 2):
+        for length in range(4, 12):
             test_seq = seq[start_pos:start_pos+length]
-            if reverse_palindrome(test_seq):
+            if reverse_palindrome_v2(test_seq) and len(test_seq) == length:
                 print start_pos + 1, len(test_seq), test_seq
 
 
