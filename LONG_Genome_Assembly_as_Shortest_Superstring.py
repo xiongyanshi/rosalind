@@ -3,64 +3,73 @@
 
 import sys
 from Bio import SeqIO
-import re
+# import re
 
 
 def glueTwoSeq(seq1, seq2):
     """
     connect two given overlap sequences into a new sequence
-    return False if glue failed
+    return overlap length, glued sequence
+    return '', '' if glue failed
     """
-    # print '\nconnecting {} AND {}'.format(seq1, seq2)
     if seq1 in seq2:
-        print '-contain!'
-        return seq2
+        return len(seq1), seq2
     elif seq2 in seq1:
-        print '-contain!'
-        return seq1
+        return len(seq2), seq1
 
     wid = len(seq1) if len(seq1) < len(seq2) else len(seq2)
-    print '\nForward gluing...',
-    # print seq1[:5], '...', seq1[-5:], '--', seq2[:5], '...', seq2[-5:],
-    for loci in range(wid/2, wid+1):
+
+    laplen1 = 0
+    contig1 = ''
+    for loci in range(wid-1, wid/2, -1):
         overlap_seq2 = seq2[:loci]
         if seq1[-loci:] == overlap_seq2:
-            print '\nFind {}bases overlap'.format(len(overlap_seq2))
-            return seq1 + seq2[loci:]
+            laplen1 = len(overlap_seq2)
+            contig1 = seq1 + seq2[loci:]
 
-    print 'Reverse gluing...',
-    # print seq2[:5], '...', seq2[-5:], '--', seq1[:5], '...', seq1[-5:],
-    for loci in range(wid/2, wid+1):
+    laplen2 = 0
+    contig2 = ''
+    for loci in range(wid-1, wid/2, -1):
         overlap_seq1 = seq1[:loci]
         if seq2[-loci:] == overlap_seq1:
-            print '\nFind {}bases overlap'.format(len(overlap_seq1))
-            return seq2 + seq1[loci:]
+            laplen2 = len(overlap_seq1)
+            contig2 = seq2 + seq1[loci:]
 
-    return False
-
-
-def glueSeqs(seq1, seq2):
-    """Glue two sequences into one, return False if failed"""
-    pass
+    return (laplen1, contig1) if laplen1 > laplen2 else (laplen2, contig2)
 
 
-def assembly_sequences(seqs):
+def assembly(seqlist):
     """
-    Assembly all sequences in seqs into a complete one
+    Assembly seq with sequence in seqList into a shortest one
     """
-    while len(seqs) != 1:
-        for each in seqs[1:]:
-            contig = glueTwoSeq(seqs[0], each)
-            if contig:
-                seqs.append(contig)
-                seqs.remove(seqs[0])
-                seqs.remove(each)
-                print 'assemblized:\n{}'.format(contig)
-                print '{} sequences remained'.format(len(seqs))
-                break
-            else:
-                pass
-    return seqs[0]
+    seqlist = list(seqlist)
+    while len(seqlist) > 1:
+        start_seq = seqlist[0]
+        remain_seqs = seqlist[1:]
+        overlap_len_list = []
+        contigs = []
+
+        for each in remain_seqs:
+            glue_result = glueTwoSeq(start_seq, each)
+            overlap_len_list.append(glue_result[0])
+            contigs.append(glue_result[1])
+
+        print 'over:', overlap_len_list
+        print 'cont:', contigs
+
+        max_overlaplen = max(overlap_len_list)
+        if max_overlaplen == 0:
+            print 'connection failed !'
+            return None
+        else:
+            best_index = overlap_len_list.index(max_overlaplen)
+            best_contig = contigs[best_index]
+            best_follow = remain_seqs[best_index]
+            seqlist.remove(start_seq)
+            seqlist.remove(best_follow)
+            seqlist.append(best_contig)
+            print 'remain:{}'.format(len(seqlist))
+    return seqlist[0]
 
 
 def verify(superString, sequence_collection):
@@ -68,6 +77,8 @@ def verify(superString, sequence_collection):
     verify if every sequence in sequence_colllection
     is a substring of superString
     """
+    if not isinstance(superString, str):
+        return False
     for each in sequence_collection:
         if each not in superString:
             return False
@@ -80,27 +91,18 @@ def main():
     sequence_list = []
     for entry in fasta_file:
         sequence_list.append(str(entry.seq))
-
-    print '\nsequences ...\n-'
-    for seq in sequence_list:
-        print seq[:20]
-
+    print '*' * 20
     print '-\n{} seqs {} bases\n-'.format(len(sequence_list),
                                           len(sequence_list[0]))
-
-    result_sequence_1 = assembly_sequences(sequence_list)
+    print '*' * 20
 
     sequence_list.reverse()
-    # result_sequence_2 = assembly_sequences(sequence_list)
+    result_sequence_1 = assembly(set(sequence_list))
 
-    print '\nresult1: \n{}\nlength:{}'.format(result_sequence_1,
-                                              len(result_sequence_1))
-    print verify(result_sequence_1, sequence_list)
-    # print '\nresult2: \n{}\nlength:{}'.format(result_sequence_2,
-    #                                           len(result_sequence_2))
-    # print verify(result_sequence_2, sequence_list)
-
-    print 'ATTAGACCTGCCGGAATAC'
+    print '\nresult:\n{}\n'.format(result_sequence_1)
+    print 'verify:', verify(result_sequence_1, sequence_list)
+    if sys.argv[1] == 'data/rosalind.txt':
+        print 'right answer:\nATTAGACCTGCCGGAATAC'
 
 
 if __name__ == '__main__':
