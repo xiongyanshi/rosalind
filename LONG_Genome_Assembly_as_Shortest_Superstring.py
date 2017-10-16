@@ -6,6 +6,19 @@ from Bio import SeqIO
 # import re
 
 
+def find_head(seq1, seq2):
+    """
+    return the head sequence in the whole chromosome
+    """
+    wid = len(seq1) if len(seq1) < len(seq2) else len(seq2)
+
+    for loci in range(wid-1, wid/2, -1):
+        overlap_seq1 = seq1[:loci]
+        if seq2[-loci:] == overlap_seq1:
+            return False
+    return True
+    
+
 def glueTwoSeq(seq1, seq2):
     """
     connect two given overlap sequences into a new sequence
@@ -13,29 +26,45 @@ def glueTwoSeq(seq1, seq2):
     return '', '' if glue failed
     """
     if seq1 in seq2:
-        return len(seq1), seq2
+        return seq2
     elif seq2 in seq1:
-        return len(seq2), seq1
+        return seq1
 
     wid = len(seq1) if len(seq1) < len(seq2) else len(seq2)
 
-    laplen1 = 0
     contig1 = ''
     for loci in range(wid-1, wid/2, -1):
         overlap_seq2 = seq2[:loci]
         if seq1[-loci:] == overlap_seq2:
-            laplen1 = len(overlap_seq2)
             contig1 = seq1 + seq2[loci:]
 
-    laplen2 = 0
     contig2 = ''
     for loci in range(wid-1, wid/2, -1):
         overlap_seq1 = seq1[:loci]
         if seq2[-loci:] == overlap_seq1:
-            laplen2 = len(overlap_seq1)
             contig2 = seq2 + seq1[loci:]
+    
+    if len(contig1) > 0:
+        if len(contig2) > 0:
+            return contig1, contig2
+        else:
+            return contig1
+    else:
+        if len(contig2) > 0:
+            return contig2
+        else:
+            return None
 
-    return (laplen1, contig1) if laplen1 > laplen2 else (laplen2, contig2)
+
+def assembly2(seqlist):
+    """try to assembly sequences in seqlist"""
+    for i in seqlist:
+        seqlist.remove(i)
+        for j in seqlist:
+            if find_head(i, j):
+                print 'find head: {}'.format(i)
+        seqlist += [i]
+    return 'finish!'
 
 
 def assembly(seqlist):
@@ -95,7 +124,7 @@ def main():
     print '-\n{} seqs {} bases\n-'.format(len(sequence_list),
                                           len(sequence_list[0]))
     print '*' * 20
-
+    '''
     sequence_list.reverse()
     result_sequence_1 = assembly(set(sequence_list))
 
@@ -103,6 +132,8 @@ def main():
     print 'verify:', verify(result_sequence_1, sequence_list)
     if sys.argv[1] == 'data/rosalind.txt':
         print 'right answer:\nATTAGACCTGCCGGAATAC'
+    '''
+    print assembly2(sequence_list)
 
 
 if __name__ == '__main__':
