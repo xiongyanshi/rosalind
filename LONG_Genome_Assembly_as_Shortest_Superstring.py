@@ -25,7 +25,9 @@ def head(seqlist):
     print 'searching head...'
     seqpool = tuple(seqlist)
     for startseq in seqpool:
+        # how many times as head
         Hcount = 0
+        # how many times as tail
         Tcount = 0
         index = seqpool.index(startseq)
         seqlist.pop(index)
@@ -34,13 +36,36 @@ def head(seqlist):
                 Tcount += 1
             if glue(startseq, restseq):
                 Hcount += 1
-        print 'as head {} times, as tail {} times'.format(Hcount, Tcount)
+        # print 'as head {} times, as tail {} times'.format(Hcount, Tcount)
         if Hcount == 1 and Tcount == 0:
-            print 'done'
+            # print 'done'
+            print 'head sequence: {}'.format(startseq)
             return startseq
         seqlist.insert(index, startseq)
-    print 'failed!'
+    # print 'failed!'
     return None
+
+
+def assembly(seqlist):
+    """
+    assembly short reads in seqlist into a contig.
+    """
+    headseq = head(seqlist[:])
+    seqlist.remove(headseq)
+    contig = headseq
+    while len(seqlist) > 0:
+        for seq in seqlist:
+            gluecontig = glue(contig, seq)
+            if gluecontig:
+                # print 'find: {}'.format(seq)
+                contig = gluecontig
+                seqlist.remove(seq)
+                # print contig
+                break
+            else:
+                pass
+
+    return contig
 
 
 def verify(superString, sequence_collection):
@@ -68,7 +93,7 @@ def main():
     print 'min length: {0}'.format(min(sequence_length))
     print 'max length: {0}'.format(max(sequence_length))
     print '*' * 20
-    print head(sequence_list)
+    print 'result:\n--\n{}\n--'.format(assembly(sequence_list))
 
     '''
     sequence_list.reverse()
