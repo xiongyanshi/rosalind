@@ -12,7 +12,7 @@ def main():
     for i in range(len(seq) - 3):
         kseq.append(seq[i:i+4])
 
-    for i in itertools.product('ACGT','ACGT','ACGT','ACGT'):
+    for i in itertools.product('ACGT',repeat=4):
         mer = ''.join(i)
         print kseq.count(mer),
     return 0
