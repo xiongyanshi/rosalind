@@ -3,3 +3,4 @@
 *.pyc
 data/*.*
 .idea
+c/demo.input
