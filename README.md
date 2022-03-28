@@ -1,2 +1,2 @@
 # rosalind
-my learning and coding road on rosalind  
+learning and coding.
